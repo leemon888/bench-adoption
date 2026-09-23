@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import { RefreshOnBack } from "./RefreshOnBack";
+import { ScrollRestorer } from "./ScrollRestorer";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -37,6 +39,9 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-[var(--cream)] text-[var(--ink)]">
         <RefreshOnBack />
+        <Suspense fallback={null}>
+          <ScrollRestorer />
+        </Suspense>
         <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--forest-900)] text-[var(--cream)]">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
             <Link href="/" className="flex items-center gap-2.5">

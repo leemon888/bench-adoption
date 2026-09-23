@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getSections, getSummary, listBenches, type BenchFilter } from "@/lib/benches";
+import { SearchForm } from "./SearchForm";
+import { FilterTabs } from "./FilterTabs";
 import benchPathImg from "@/assets/park/bench-path.webp";
 import benchReaderImg from "@/assets/park/bench-reader.webp";
 import lakeCanoesImg from "@/assets/park/lake-canoes.webp";
@@ -49,12 +51,6 @@ const GALLERY = [
     alt: "Aerial view of the Van Cortlandt Park golf course",
     caption: "The Golf Course Perimeter, from above",
   },
-];
-
-const FILTER_TABS: { value: BenchFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "available", label: "Available" },
-  { value: "adopted", label: "Adopted" },
 ];
 
 function StatusPill({ status }: { status: "available" | "adopted" }) {
@@ -130,93 +126,14 @@ export default async function BenchesPage({
         <StatTile label="Adopted" value={summary.adopted} />
       </div>
 
-      <form
-        className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-[var(--border)] bg-[var(--paper)] p-4"
-        action="/"
-      >
-        <input type="hidden" name="filter" value={filter} />
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-[var(--ink-faint)]">
-            Search
-          </label>
-          <div className="relative">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--ink-faint)]"
-            >
-              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
-              <path
-                d="M20 20l-3.2-3.2"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
-            <input
-              type="text"
-              name="q"
-              defaultValue={query}
-              placeholder="Bench code, area, or donor name"
-              className="w-64 rounded-md border border-[var(--border)] bg-white py-2 pl-8 pr-3 text-sm"
-            />
-          </div>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-[var(--ink-faint)]">
-            Section
-          </label>
-          <select
-            name="section"
-            defaultValue={section ?? ""}
-            className="rounded-md border border-[var(--border)] bg-white px-3 py-2 text-sm"
-          >
-            <option value="">All sections</option>
-            {sections.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button
-          type="submit"
-          className="rounded-md bg-[var(--forest-700)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--forest-600)]"
-        >
-          Search
-        </button>
-        {(query || section || filter !== "all") && (
-          <Link
-            href="/"
-            className="text-sm text-[var(--ink-faint)] underline underline-offset-2"
-          >
-            Clear
-          </Link>
-        )}
-      </form>
+      <SearchForm
+        filter={filter}
+        query={query}
+        section={section}
+        sections={sections}
+      />
 
-      <div className="mb-6 inline-flex rounded-lg border border-[var(--border)] bg-[var(--paper)] p-1">
-        {FILTER_TABS.map((tab) => (
-          <Link
-            key={tab.value}
-            href={buildHref({
-              filter: tab.value === "all" ? undefined : tab.value,
-              section,
-              q: query,
-            })}
-            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-              filter === tab.value
-                ? "bg-[var(--forest-700)] text-white"
-                : "text-[var(--ink-soft)] hover:bg-[var(--leaf-100)]"
-            }`}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </div>
+      <FilterTabs filter={filter} section={section} query={query} />
 
       <p className="mb-3 text-sm text-[var(--ink-faint)]">
         {results.length} bench{results.length === 1 ? "" : "es"} match
