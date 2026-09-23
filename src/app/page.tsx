@@ -28,6 +28,39 @@ function StatTile({ label, value }: { label: string; value: number }) {
   );
 }
 
+function HeroIllustration() {
+  return (
+    <div className="overflow-hidden rounded-xl border border-white/10 bg-[var(--sky-100)]">
+      <svg viewBox="0 0 400 280" className="block w-full" aria-hidden="true">
+        <rect width="400" height="280" fill="var(--sky-100)" />
+        <circle cx="330" cy="60" r="34" fill="var(--gold-100)" />
+        <path
+          d="M0 190C60 160 110 210 170 180C230 150 270 200 400 165V280H0Z"
+          fill="var(--leaf-100)"
+        />
+        <path
+          d="M0 220C70 195 130 235 190 210C250 185 300 225 400 205V280H0Z"
+          fill="var(--forest-500)"
+        />
+        {/* tree */}
+        <rect x="94" y="150" width="8" height="55" rx="2" fill="var(--ink-soft)" />
+        <circle cx="98" cy="120" r="34" fill="var(--forest-600)" />
+        <circle cx="72" cy="140" r="22" fill="var(--forest-700)" />
+        <circle cx="124" cy="140" r="22" fill="var(--forest-700)" />
+        {/* bench */}
+        <g transform="translate(220,196)">
+          <rect x="0" y="0" width="90" height="8" rx="2" fill="var(--ink)" />
+          <rect x="0" y="-22" width="90" height="8" rx="2" fill="var(--ink)" />
+          <rect x="4" y="-22" width="6" height="38" fill="var(--ink)" />
+          <rect x="80" y="-22" width="6" height="38" fill="var(--ink)" />
+          <rect x="4" y="16" width="6" height="16" fill="var(--ink-soft)" />
+          <rect x="80" y="16" width="6" height="16" fill="var(--ink-soft)" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 const FILTER_TABS: { value: BenchFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "available", label: "Available" },
@@ -76,18 +109,21 @@ export default async function BenchesPage({
 
   return (
     <div>
-      <section className="mb-10 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--forest-700)] px-6 py-10 text-[var(--cream)] sm:px-10 sm:py-14">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gold-100)]">
-          Van Cortlandt Park Conservancy
-        </p>
-        <h1 className="font-display mt-3 max-w-xl text-3xl font-semibold leading-tight sm:text-4xl">
-          Give a bench, leave a legacy in the park.
-        </h1>
-        <p className="mt-4 max-w-xl text-[var(--leaf-100)]">
-          Browse all {summary.total} benches across the park&rsquo;s ten
-          sections, see who has already dedicated one, and adopt an
-          available bench for your own family, memory, or organization.
-        </p>
+      <section className="mb-10 grid gap-8 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--forest-700)] px-6 py-10 text-[var(--cream)] sm:px-10 sm:py-14 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--sky-100)]">
+            Van Cortlandt Park Conservancy
+          </p>
+          <h1 className="font-display mt-3 max-w-xl text-3xl font-semibold leading-tight sm:text-4xl">
+            Give a bench, leave a legacy in the park.
+          </h1>
+          <p className="mt-4 max-w-xl text-[var(--leaf-100)]">
+            Browse all {summary.total} benches across the park&rsquo;s ten
+            sections, see who has already dedicated one, and adopt an
+            available bench for your own family, memory, or organization.
+          </p>
+        </div>
+        <HeroIllustration />
       </section>
 
       <div className="mb-8 grid grid-cols-3 gap-3 sm:gap-4">

@@ -46,7 +46,7 @@ export default function RootLayout({
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
-                className="shrink-0 text-[var(--gold-100)]"
+                className="shrink-0 text-[var(--sky-100)]"
               >
                 <path
                   d="M4 21V13.5C4 9.9 6.7 7 10 7s6 2.9 6 6.5V21"
@@ -70,7 +70,7 @@ export default function RootLayout({
               </svg>
               <span className="font-display text-lg font-semibold leading-tight">
                 Van Cortlandt Park
-                <span className="block text-xs font-normal text-[var(--gold-100)]">
+                <span className="block text-xs font-normal text-[var(--sky-100)]">
                   Bench Adoption Program
                 </span>
               </span>

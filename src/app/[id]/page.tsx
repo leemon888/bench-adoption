@@ -28,7 +28,7 @@ export default async function BenchDetailPage({
 
       <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--paper)]">
         <div className="border-b border-[var(--border)] bg-[var(--forest-700)] px-6 py-6 text-[var(--cream)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gold-100)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--sky-100)]">
             {bench.section}
           </p>
           <div className="mt-2 flex items-center justify-between gap-3">

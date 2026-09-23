@@ -1,22 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --cream: #f7f3e7;
-  --paper: #fffdf8;
-  --ink: #22301c;
-  --ink-soft: #4d5a41;
-  --ink-faint: #7a8468;
-  --border: #ddd3b3;
-  --forest-900: #1c2917;
-  --forest-700: #2c4023;
-  --forest-600: #3a5430;
-  --forest-500: #4a6a3d;
-  --gold-700: #8a5a17;
-  --gold-100: #f2e3bf;
-  --leaf-700: #2f6b3f;
-  --leaf-100: #dcecd7;
-  --brick-700: #8a2c22;
-  --brick-100: #fbeceb;
+  --cream: #f2f9ee;
+  --paper: #ffffff;
+  --ink: #1d2b1f;
+  --ink-soft: #45573c;
+  --ink-faint: #7c8d70;
+  --border: #d8e8ce;
+  --forest-900: #2c6a46;
+  --forest-700: #3c8256;
+  --forest-600: #4a9563;
+  --forest-500: #5fae79;
+  --sky-700: #0f7a8c;
+  --sky-100: #cdeef2;
+  --gold-700: #b3730f;
+  --gold-100: #fbe7c4;
+  --leaf-700: #0e8a6e;
+  --leaf-100: #d7f5ec;
+  --brick-700: #c0392b;
+  --brick-100: #fceceb;
 }
 
 @theme inline {
