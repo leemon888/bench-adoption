@@ -10,61 +10,72 @@ export default async function BenchDetailPage({
 }) {
   const { id } = await params;
   const benchId = Number(id);
-  const bench = Number.isFinite(benchId) ? getBench(benchId) : null;
+  const bench = Number.isFinite(benchId) ? await getBench(benchId) : null;
   if (!bench) notFound();
 
+  const adopted = bench.status === "adopted";
+
   return (
-    <div>
+    <div className="mx-auto max-w-2xl">
       <Link
         href="/"
-        className="text-sm text-[#6b6350] underline underline-offset-2"
+        className="inline-flex items-center gap-1 text-sm text-[var(--ink-faint)] underline underline-offset-2"
       >
         &larr; Back to all benches
       </Link>
 
-      <div className="mt-4 rounded-lg border border-[#d8d0bc] bg-white p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="font-mono text-2xl font-semibold text-[#2f3b26]">
+      <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--paper)]">
+        <div className="border-b border-[var(--border)] bg-[var(--forest-700)] px-6 py-6 text-[var(--cream)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gold-100)]">
+            {bench.section}
+          </p>
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <h1 className="font-display font-mono text-2xl font-semibold">
               {bench.code}
             </h1>
-            <p className="mt-1 text-[#4a4536]">{bench.section}</p>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
+                adopted
+                  ? "bg-[var(--gold-100)] text-[var(--gold-700)]"
+                  : "bg-[var(--leaf-100)] text-[var(--leaf-700)]"
+              }`}
+            >
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  adopted ? "bg-[var(--gold-700)]" : "bg-[var(--leaf-700)]"
+                }`}
+              />
+              {adopted ? "Adopted" : "Available"}
+            </span>
           </div>
-          <span
-            className={`rounded-full px-3 py-1 text-sm font-medium ${
-              bench.status === "adopted"
-                ? "bg-[#e4d9b8] text-[#6b5a1f]"
-                : "bg-[#dbe8d4] text-[#33622f]"
-            }`}
-          >
-            {bench.status === "adopted" ? "Adopted" : "Available"}
-          </span>
         </div>
 
-        {bench.adoption ? (
-          <div className="mt-6 rounded-md bg-[#f6f3ec] p-4">
-            <p className="text-sm text-[#6b6350]">Dedicated by</p>
-            <p className="text-lg font-semibold text-[#2f3b26]">
-              {bench.adoption.donorName}
-            </p>
-            {bench.adoption.message && (
-              <p className="mt-2 italic text-[#4a4536]">
-                &ldquo;{bench.adoption.message}&rdquo;
+        <div className="px-6 py-6">
+          {bench.adoption ? (
+            <div>
+              <p className="text-sm text-[var(--ink-faint)]">Dedicated by</p>
+              <p className="font-display mt-1 text-xl font-semibold text-[var(--forest-700)]">
+                {bench.adoption.donorName}
               </p>
-            )}
-            <p className="mt-3 text-sm text-[#6b6350]">
-              Adopted since {bench.adoption.startDate} &middot; through{" "}
-              {bench.expiresOn}
-            </p>
-          </div>
-        ) : (
-          <div className="mt-6">
-            <h2 className="mb-3 text-lg font-semibold text-[#2f3b26]">
-              Adopt this bench
-            </h2>
-            <AdoptForm benchId={bench.id} />
-          </div>
-        )}
+              {bench.adoption.message && (
+                <p className="mt-3 italic text-[var(--ink-soft)]">
+                  &ldquo;{bench.adoption.message}&rdquo;
+                </p>
+              )}
+              <p className="mt-4 border-t border-[var(--border)] pt-4 text-sm text-[var(--ink-faint)]">
+                Adopted since {bench.adoption.startDate} &middot; through{" "}
+                {bench.expiresOn}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <h2 className="font-display mb-4 text-lg font-semibold text-[var(--forest-700)]">
+                Adopt this bench
+              </h2>
+              <AdoptForm benchId={bench.id} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: {
@@ -17,20 +30,56 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-screen bg-[#f6f3ec] text-[#1f2a1a]">
-        <header className="border-b border-[#d8d0bc] bg-[#2f3b26] text-[#f6f3ec]">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-            <Link href="/" className="font-serif text-xl font-semibold">
-              Van Cortlandt Park &middot; Bench Adoption
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
+    >
+      <body className="min-h-screen bg-[var(--cream)] text-[var(--ink)]">
+        <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--forest-900)] text-[var(--cream)]">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+            <Link href="/" className="flex items-center gap-2.5">
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                className="shrink-0 text-[var(--gold-100)]"
+              >
+                <path
+                  d="M4 21V13.5C4 9.9 6.7 7 10 7s6 2.9 6 6.5V21"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M10 7V3.5M10 3.5c1.5 0 2.5 1 2.5 2.5M10 3.5c-1.5 0-2.5 1-2.5 2.5"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M2 21h20M3.5 21v-3.2h4.4V21M14.5 21v-4.6h5V21"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="font-display text-lg font-semibold leading-tight">
+                Van Cortlandt Park
+                <span className="block text-xs font-normal text-[var(--gold-100)]">
+                  Bench Adoption Program
+                </span>
+              </span>
             </Link>
-            <span className="text-sm text-[#cfd6c4]">
+            <span className="hidden font-display text-sm italic text-[var(--gold-100)] sm:block">
               A gift that lasts, a seat with a story
             </span>
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">{children}</main>
-        <footer className="border-t border-[#d8d0bc] py-6 text-center text-sm text-[#6b6350]">
+        <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">{children}</main>
+        <footer className="border-t border-[var(--border)] py-8 text-center text-sm text-[var(--ink-faint)]">
           Van Cortlandt Park Bench Adoption Program
         </footer>
       </body>

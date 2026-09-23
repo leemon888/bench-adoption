@@ -14,6 +14,37 @@ function buildHref(params: Record<string, string | undefined>) {
   return qs ? `/?${qs}` : "/";
 }
 
+function StatTile({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--paper)] px-5 py-4">
+      <p className="font-display text-3xl font-semibold text-[var(--forest-700)]">
+        {value.toLocaleString()}
+      </p>
+      <p className="mt-0.5 text-sm text-[var(--ink-faint)]">{label}</p>
+    </div>
+  );
+}
+
+function StatusPill({ status }: { status: "available" | "adopted" }) {
+  const adopted = status === "adopted";
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
+        adopted
+          ? "bg-[var(--gold-100)] text-[var(--gold-700)]"
+          : "bg-[var(--leaf-100)] text-[var(--leaf-700)]"
+      }`}
+    >
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${
+          adopted ? "bg-[var(--gold-700)]" : "bg-[var(--leaf-700)]"
+        }`}
+      />
+      {adopted ? "Adopted" : "Available"}
+    </span>
+  );
+}
+
 export default async function BenchesPage({
   searchParams,
 }: {
@@ -26,33 +57,42 @@ export default async function BenchesPage({
   const page = Math.max(1, Number(sp.page) || 1);
 
   const sections = getSections();
-  const summary = getSummary();
-  const results = listBenches({ filter, section, query });
+  const [summary, results] = await Promise.all([
+    getSummary(),
+    listBenches({ filter, section, query }),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(results.length / PAGE_SIZE));
   const pageItems = results.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl font-semibold text-[#2f3b26]">
-          Adopt a bench
-        </h1>
-        <p className="mt-2 max-w-2xl text-[#4a4536]">
-          Van Cortlandt Park has {summary.total} benches across ten sections.
-          {" "}
-          {summary.available} are currently available to adopt, and{" "}
-          {summary.adopted} are dedicated by donors. Browse below, or search
-          for a bench by code or dedication.
+      <section className="mb-10 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--forest-700)] px-6 py-10 text-[var(--cream)] sm:px-10 sm:py-14">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gold-100)]">
+          Van Cortlandt Park Conservancy
         </p>
+        <h1 className="font-display mt-3 max-w-xl text-3xl font-semibold leading-tight sm:text-4xl">
+          Give a bench, leave a legacy in the park.
+        </h1>
+        <p className="mt-4 max-w-xl text-[var(--leaf-100)]">
+          Browse all {summary.total} benches across the park&rsquo;s ten
+          sections, see who has already dedicated one, and adopt an
+          available bench for your own family, memory, or organization.
+        </p>
+      </section>
+
+      <div className="mb-8 grid grid-cols-3 gap-3 sm:gap-4">
+        <StatTile label="Total benches" value={summary.total} />
+        <StatTile label="Available" value={summary.available} />
+        <StatTile label="Adopted" value={summary.adopted} />
       </div>
 
       <form
-        className="mb-6 flex flex-wrap items-end gap-3 rounded-lg border border-[#d8d0bc] bg-white p-4"
+        className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-[var(--border)] bg-[var(--paper)] p-4"
         action="/"
       >
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-[#6b6350]">
+          <label className="text-xs font-medium uppercase tracking-wide text-[var(--ink-faint)]">
             Search
           </label>
           <input
@@ -60,17 +100,17 @@ export default async function BenchesPage({
             name="q"
             defaultValue={query}
             placeholder="Bench code or donor name"
-            className="w-56 rounded border border-[#c9c1a8] px-3 py-2 text-sm"
+            className="w-56 rounded-md border border-[var(--border)] bg-white px-3 py-2 text-sm"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-[#6b6350]">
+          <label className="text-xs font-medium uppercase tracking-wide text-[var(--ink-faint)]">
             Section
           </label>
           <select
             name="section"
             defaultValue={section ?? ""}
-            className="rounded border border-[#c9c1a8] px-3 py-2 text-sm"
+            className="rounded-md border border-[var(--border)] bg-white px-3 py-2 text-sm"
           >
             <option value="">All sections</option>
             {sections.map((s) => (
@@ -81,13 +121,13 @@ export default async function BenchesPage({
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-[#6b6350]">
+          <label className="text-xs font-medium uppercase tracking-wide text-[var(--ink-faint)]">
             Status
           </label>
           <select
             name="filter"
             defaultValue={filter}
-            className="rounded border border-[#c9c1a8] px-3 py-2 text-sm"
+            className="rounded-md border border-[var(--border)] bg-white px-3 py-2 text-sm"
           >
             <option value="all">All</option>
             <option value="available">Available</option>
@@ -96,21 +136,21 @@ export default async function BenchesPage({
         </div>
         <button
           type="submit"
-          className="rounded bg-[#2f3b26] px-4 py-2 text-sm font-medium text-white hover:bg-[#3d4c32]"
+          className="rounded-md bg-[var(--forest-700)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--forest-600)]"
         >
           Filter
         </button>
         {(query || section || filter !== "all") && (
           <Link
             href="/"
-            className="text-sm text-[#6b6350] underline underline-offset-2"
+            className="text-sm text-[var(--ink-faint)] underline underline-offset-2"
           >
             Clear
           </Link>
         )}
       </form>
 
-      <p className="mb-3 text-sm text-[#6b6350]">
+      <p className="mb-3 text-sm text-[var(--ink-faint)]">
         {results.length} bench{results.length === 1 ? "" : "es"} match
         {results.length === 1 ? "es" : ""}
       </p>
@@ -120,25 +160,17 @@ export default async function BenchesPage({
           <Link
             key={bench.id}
             href={`/${bench.id}`}
-            className="rounded-lg border border-[#d8d0bc] bg-white p-4 transition-shadow hover:shadow-md"
+            className="group rounded-xl border border-[var(--border)] bg-[var(--paper)] p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--forest-500)] hover:shadow-md"
           >
             <div className="flex items-start justify-between">
-              <span className="font-mono text-sm font-semibold text-[#2f3b26]">
+              <span className="font-mono text-sm font-semibold text-[var(--forest-700)]">
                 {bench.code}
               </span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                  bench.status === "adopted"
-                    ? "bg-[#e4d9b8] text-[#6b5a1f]"
-                    : "bg-[#dbe8d4] text-[#33622f]"
-                }`}
-              >
-                {bench.status === "adopted" ? "Adopted" : "Available"}
-              </span>
+              <StatusPill status={bench.status} />
             </div>
-            <p className="mt-1 text-sm text-[#4a4536]">{bench.section}</p>
+            <p className="mt-1.5 text-sm text-[var(--ink-soft)]">{bench.section}</p>
             {bench.adoption && (
-              <p className="mt-2 text-sm text-[#6b6350]">
+              <p className="mt-2 border-t border-[var(--border)] pt-2 text-sm text-[var(--ink-faint)]">
                 Dedicated by {bench.adoption.donorName} &middot; through{" "}
                 {bench.expiresOn}
               </p>
@@ -148,7 +180,7 @@ export default async function BenchesPage({
       </div>
 
       {pageItems.length === 0 && (
-        <p className="mt-8 text-center text-[#6b6350]">
+        <p className="mt-8 text-center text-[var(--ink-faint)]">
           No benches match those filters.
         </p>
       )}
@@ -159,10 +191,10 @@ export default async function BenchesPage({
             <Link
               key={p}
               href={buildHref({ filter, section, q: query, page: String(p) })}
-              className={`rounded px-3 py-1 ${
+              className={`rounded-md px-3 py-1 ${
                 p === page
-                  ? "bg-[#2f3b26] text-white"
-                  : "border border-[#d8d0bc] text-[#4a4536] hover:bg-white"
+                  ? "bg-[var(--forest-700)] text-white"
+                  : "border border-[var(--border)] text-[var(--ink-soft)] hover:bg-white"
               }`}
             >
               {p}

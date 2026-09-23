@@ -18,7 +18,7 @@ export async function adoptBenchAction(
     durationUnit === "years" ? durationValue * 12 : durationValue;
 
   try {
-    adoptBench(benchId, { donorName, message, durationMonths });
+    await adoptBench(benchId, { donorName, message, durationMonths });
   } catch (err) {
     if (err instanceof AdoptionError) {
       return { error: err.message, success: false };

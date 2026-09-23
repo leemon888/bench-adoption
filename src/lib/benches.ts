@@ -1,129 +1,15 @@
-import { db } from "@/lib/db";
+import { getStore } from "@/lib/store";
+import type { AdoptionRow, BenchRow } from "@/lib/store";
+import { SECTIONS } from "@/lib/seed-data";
 
-export type Bench = {
-  id: number;
-  code: string;
-  section: string;
-  note: string | null;
-};
-
-export type Adoption = {
-  id: number;
-  benchId: number;
-  donorName: string;
-  message: string | null;
-  startDate: string;
-  durationMonths: number;
-  createdAt: string;
-};
+export type Bench = BenchRow;
+export type Adoption = AdoptionRow;
 
 export type BenchWithStatus = Bench & {
   adoption: Adoption | null;
   status: "available" | "adopted";
   expiresOn: string | null;
 };
-
-const SECTIONS = [
-  "Parade Ground",
-  "Van Cortlandt Lake",
-  "Old Croton Trail",
-  "John Kieran Nature Trail",
-  "Vault Hill",
-  "Tibbetts Brook",
-  "Golf Course Perimeter",
-  "Woodlawn Road",
-  "242nd Street Entrance",
-  "Broadway Entrance",
-];
-
-const SECTION_PREFIX: Record<string, string> = {
-  "Parade Ground": "PG",
-  "Van Cortlandt Lake": "VCL",
-  "Old Croton Trail": "OCT",
-  "John Kieran Nature Trail": "JKT",
-  "Vault Hill": "VH",
-  "Tibbetts Brook": "TB",
-  "Golf Course Perimeter": "GCP",
-  "Woodlawn Road": "WR",
-  "242nd Street Entrance": "242",
-  "Broadway Entrance": "BWY",
-};
-
-const BENCH_COUNT = 500;
-
-function seededRandom(seed: number) {
-  let s = seed;
-  return () => {
-    s = (s * 1103515245 + 12345) & 0x7fffffff;
-    return s / 0x7fffffff;
-  };
-}
-
-function seedIfEmpty() {
-  const { count } = db
-    .prepare("SELECT COUNT(*) as count FROM benches")
-    .get() as { count: number };
-  if (count > 0) return;
-
-  const rand = seededRandom(42);
-  const insertBench = db.prepare(
-    "INSERT INTO benches (id, code, section, note) VALUES (?, ?, ?, ?)"
-  );
-  const insertAdoption = db.prepare(
-    `INSERT INTO adoptions (bench_id, donor_name, message, start_date, duration_months, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`
-  );
-
-  const donors = [
-    "The Alvarez Family",
-    "Friends of Van Cortlandt Park",
-    "Margaret & Owen Petrov",
-    "Bronx Runners Club",
-    "In memory of Rosa DiMarco",
-    "The Chen-Okafor Family",
-    "P.S. 95 Fourth Grade Class of 2019",
-    "Kingsbridge Heights Association",
-    "In honor of Coach Reyes",
-    "Anonymous",
-  ];
-
-  const perSection = Math.floor(BENCH_COUNT / SECTIONS.length);
-  let benchId = 1;
-  const txn = db.transaction(() => {
-    for (const section of SECTIONS) {
-      const prefix = SECTION_PREFIX[section];
-      for (let i = 1; i <= perSection; i++) {
-        const code = `${prefix}-${String(i).padStart(3, "0")}`;
-        insertBench.run(benchId, code, section, null);
-
-        // Roughly a third of benches start out adopted, mixing active
-        // and already-expired terms so the "available again" path has
-        // real data to demonstrate.
-        const roll = rand();
-        if (roll < 0.35) {
-          const donor = donors[Math.floor(rand() * donors.length)];
-          const durationMonths = [12, 24, 36, 60][
-            Math.floor(rand() * 4)
-          ];
-          // startedMonthsAgo ranges 0..48, so some terms have already lapsed.
-          const startedMonthsAgo = Math.floor(rand() * 48);
-          const start = new Date();
-          start.setMonth(start.getMonth() - startedMonthsAgo);
-          insertAdoption.run(
-            benchId,
-            donor,
-            null,
-            start.toISOString().slice(0, 10),
-            durationMonths,
-            start.toISOString()
-          );
-        }
-        benchId++;
-      }
-    }
-  });
-  txn();
-}
 
 function withStatus(bench: Bench, adoption: Adoption | null): BenchWithStatus {
   if (!adoption) {
@@ -141,31 +27,20 @@ function withStatus(bench: Bench, adoption: Adoption | null): BenchWithStatus {
   };
 }
 
-function latestAdoptionFor(benchId: number): Adoption | null {
-  const row = db
-    .prepare(
-      `SELECT id, bench_id as benchId, donor_name as donorName, message,
-              start_date as startDate, duration_months as durationMonths,
-              created_at as createdAt
-       FROM adoptions WHERE bench_id = ? ORDER BY created_at DESC LIMIT 1`
-    )
-    .get(benchId) as Adoption | undefined;
-  return row ?? null;
-}
-
 export type BenchFilter = "all" | "available" | "adopted";
 
-export function listBenches(opts: {
+export async function listBenches(opts: {
   filter?: BenchFilter;
   section?: string;
   query?: string;
-}): BenchWithStatus[] {
-  seedIfEmpty();
-  const benches = db
-    .prepare("SELECT id, code, section, note FROM benches ORDER BY id")
-    .all() as Bench[];
+}): Promise<BenchWithStatus[]> {
+  const store = await getStore();
+  const [benches, adoptions] = await Promise.all([
+    store.listBenches(),
+    store.latestAdoptions(),
+  ]);
 
-  let withStatuses = benches.map((b) => withStatus(b, latestAdoptionFor(b.id)));
+  let withStatuses = benches.map((b) => withStatus(b, adoptions.get(b.id) ?? null));
 
   if (opts.section) {
     withStatuses = withStatuses.filter((b) => b.section === opts.section);
@@ -186,34 +61,31 @@ export function listBenches(opts: {
   return withStatuses;
 }
 
-export function getBench(id: number): BenchWithStatus | null {
-  seedIfEmpty();
-  const bench = db
-    .prepare("SELECT id, code, section, note FROM benches WHERE id = ?")
-    .get(id) as Bench | undefined;
+export async function getBench(id: number): Promise<BenchWithStatus | null> {
+  const store = await getStore();
+  const bench = await store.getBench(id);
   if (!bench) return null;
-  return withStatus(bench, latestAdoptionFor(bench.id));
+  const adoption = await store.latestAdoptionFor(bench.id);
+  return withStatus(bench, adoption);
 }
 
 export function getSections(): string[] {
-  seedIfEmpty();
-  return SECTIONS;
+  return [...SECTIONS];
 }
 
-export function getSummary() {
-  seedIfEmpty();
-  const all = listBenches({});
+export async function getSummary() {
+  const all = await listBenches({});
   const adopted = all.filter((b) => b.status === "adopted").length;
   return { total: all.length, adopted, available: all.length - adopted };
 }
 
 export class AdoptionError extends Error {}
 
-export function adoptBench(
+export async function adoptBench(
   benchId: number,
   input: { donorName: string; message?: string; durationMonths: number }
 ) {
-  const bench = getBench(benchId);
+  const bench = await getBench(benchId);
   if (!bench) throw new AdoptionError("Bench not found.");
   if (bench.status === "adopted") {
     throw new AdoptionError("This bench is already adopted.");
@@ -224,16 +96,13 @@ export function adoptBench(
     throw new AdoptionError("Duration must be a positive number of months.");
   }
 
+  const store = await getStore();
   const now = new Date();
-  db.prepare(
-    `INSERT INTO adoptions (bench_id, donor_name, message, start_date, duration_months, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`
-  ).run(
-    benchId,
+  await store.insertAdoption(benchId, {
     donorName,
-    input.message?.trim() || null,
-    now.toISOString().slice(0, 10),
-    input.durationMonths,
-    now.toISOString()
-  );
+    message: input.message?.trim() || null,
+    startDate: now.toISOString().slice(0, 10),
+    durationMonths: input.durationMonths,
+    createdAt: now.toISOString(),
+  });
 }

@@ -11,7 +11,32 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). With no database
+configured, this uses a local SQLite file (`data/bench-adoption.db`) —
+nothing else to set up.
+
+## Persistent storage (Postgres)
+
+By default this app falls back to SQLite, which is fine locally but is
+**not durable on Vercel** (serverless functions get a fresh, empty `/tmp`
+on every cold start, so adoptions "disappear"). To make adoptions actually
+persist in production:
+
+1. In your Vercel project, go to **Storage → Create Database → Postgres**
+   (Neon-backed, free tier) and connect it to the project. Vercel will
+   automatically add a `POSTGRES_URL` (or `DATABASE_URL`) environment
+   variable to the project — no code changes needed.
+2. Redeploy. On first request, the app detects `POSTGRES_URL`, creates the
+   `benches`/`adoptions` tables if they don't exist, and seeds the same
+   500-bench dataset once. From then on, adoptions are written to Postgres
+   and survive reloads, redeploys, and cold starts.
+3. (Optional, for local testing against the real database) run
+   `vercel env pull .env.local` in this project to pull the same
+   `POSTGRES_URL` down locally, then `npm run dev` will use Postgres
+   instead of SQLite.
+
+The two backends share one interface (`src/lib/store.ts`), so
+`src/lib/benches.ts` doesn't know or care which one is active.
 
 ## Design notes
 
@@ -29,17 +54,18 @@ Open [http://localhost:3000](http://localhost:3000).
   sections (no real bench inventory was provided), with roughly a third
   pre-seeded with adoptions — some active, some already expired — so the
   "available again" behavior has real data to demonstrate on first run.
+  The generator (`src/lib/seed-data.ts`) is deterministic and shared by
+  both storage backends, so they produce an identical starting dataset.
 - **Assumptions**: no payment collection (per the brief); one active
   adoption per bench; donor identity is a free-text name/dedication with no
   login, matching the brief's low-friction "let people adopt a bench"
   goal; adoption length is entered in months or years and stored as
-  months.
-- **Storage caveat**: uses a local SQLite file (`better-sqlite3`) for
-  simplicity. On Vercel this is written to `/tmp`, which is not durable
-  across deploys/cold starts — fine for demoing this take-home, but a real
-  deployment would swap in hosted Postgres.
+  months. No waitlist for already-adopted benches — kept out of scope to
+  match what the brief actually asked for (view + adopt), though it would
+  be a natural next feature.
 
 ## Stack
 
 Next.js 16 (App Router, Server Actions), React 19, TypeScript, Tailwind
-CSS, SQLite via `better-sqlite3`.
+CSS. Storage is SQLite (`better-sqlite3`) locally by default, or Postgres
+(`pg`) in production once connected — see above.
