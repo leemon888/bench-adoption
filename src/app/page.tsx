@@ -39,17 +39,14 @@ const GALLERY = [
   {
     src: benchReaderImg,
     alt: "A visitor reading on an adopted bench under the trees",
-    caption: "A quiet moment on a park bench",
   },
   {
     src: lakeCanoesImg,
     alt: "Canoes on Van Cortlandt Lake in autumn",
-    caption: "Van Cortlandt Lake",
   },
   {
     src: golfAerialImg,
     alt: "Aerial view of the Van Cortlandt Park golf course",
-    caption: "The Golf Course Perimeter, from above",
   },
 ];
 
@@ -210,7 +207,7 @@ export default async function BenchesPage({
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {GALLERY.map((item) => (
             <figure
-              key={item.caption}
+              key={item.alt}
               className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--paper)]"
             >
               <Image
@@ -219,9 +216,6 @@ export default async function BenchesPage({
                 className="h-40 w-full object-cover"
                 placeholder="blur"
               />
-              <figcaption className="px-3 py-2 text-sm text-[var(--ink-soft)]">
-                {item.caption}
-              </figcaption>
             </figure>
           ))}
         </div>
