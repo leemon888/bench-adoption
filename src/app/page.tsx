@@ -1,5 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getSections, getSummary, listBenches, type BenchFilter } from "@/lib/benches";
+import benchPathImg from "@/assets/park/bench-path.webp";
+import benchReaderImg from "@/assets/park/bench-reader.webp";
+import lakeCanoesImg from "@/assets/park/lake-canoes.webp";
+import golfAerialImg from "@/assets/park/golf-aerial.webp";
 
 export const metadata = { title: "Adopt a bench" };
 export const dynamic = "force-dynamic";
@@ -28,38 +33,23 @@ function StatTile({ label, value }: { label: string; value: number }) {
   );
 }
 
-function HeroIllustration() {
-  return (
-    <div className="overflow-hidden rounded-xl border border-white/10 bg-[var(--sky-100)]">
-      <svg viewBox="0 0 400 280" className="block w-full" aria-hidden="true">
-        <rect width="400" height="280" fill="var(--sky-100)" />
-        <circle cx="330" cy="60" r="34" fill="var(--gold-100)" />
-        <path
-          d="M0 190C60 160 110 210 170 180C230 150 270 200 400 165V280H0Z"
-          fill="var(--leaf-100)"
-        />
-        <path
-          d="M0 220C70 195 130 235 190 210C250 185 300 225 400 205V280H0Z"
-          fill="var(--forest-500)"
-        />
-        {/* tree */}
-        <rect x="94" y="150" width="8" height="55" rx="2" fill="var(--ink-soft)" />
-        <circle cx="98" cy="120" r="34" fill="var(--forest-600)" />
-        <circle cx="72" cy="140" r="22" fill="var(--forest-700)" />
-        <circle cx="124" cy="140" r="22" fill="var(--forest-700)" />
-        {/* bench */}
-        <g transform="translate(220,196)">
-          <rect x="0" y="0" width="90" height="8" rx="2" fill="var(--ink)" />
-          <rect x="0" y="-22" width="90" height="8" rx="2" fill="var(--ink)" />
-          <rect x="4" y="-22" width="6" height="38" fill="var(--ink)" />
-          <rect x="80" y="-22" width="6" height="38" fill="var(--ink)" />
-          <rect x="4" y="16" width="6" height="16" fill="var(--ink-soft)" />
-          <rect x="80" y="16" width="6" height="16" fill="var(--ink-soft)" />
-        </g>
-      </svg>
-    </div>
-  );
-}
+const GALLERY = [
+  {
+    src: benchReaderImg,
+    alt: "A visitor reading on an adopted bench under the trees",
+    caption: "A quiet moment on a park bench",
+  },
+  {
+    src: lakeCanoesImg,
+    alt: "Canoes on Van Cortlandt Lake in autumn",
+    caption: "Van Cortlandt Lake",
+  },
+  {
+    src: golfAerialImg,
+    alt: "Aerial view of the Van Cortlandt Park golf course",
+    caption: "The Golf Course Perimeter, from above",
+  },
+];
 
 const FILTER_TABS: { value: BenchFilter; label: string }[] = [
   { value: "all", label: "All" },
@@ -123,7 +113,15 @@ export default async function BenchesPage({
             available bench for your own family, memory, or organization.
           </p>
         </div>
-        <HeroIllustration />
+        <div className="overflow-hidden rounded-xl border border-white/10">
+          <Image
+            src={benchPathImg}
+            alt="A tree-lined path with several benches in Van Cortlandt Park"
+            className="h-full w-full object-cover"
+            placeholder="blur"
+            priority
+          />
+        </div>
       </section>
 
       <div className="mb-8 grid grid-cols-3 gap-3 sm:gap-4">
@@ -287,6 +285,30 @@ export default async function BenchesPage({
           ))}
         </div>
       )}
+
+      <section className="mt-14 border-t border-[var(--border)] pt-10">
+        <h2 className="font-display text-xl font-semibold text-[var(--forest-700)]">
+          Scenes from the park
+        </h2>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {GALLERY.map((item) => (
+            <figure
+              key={item.caption}
+              className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--paper)]"
+            >
+              <Image
+                src={item.src}
+                alt={item.alt}
+                className="h-40 w-full object-cover"
+                placeholder="blur"
+              />
+              <figcaption className="px-3 py-2 text-sm text-[var(--ink-soft)]">
+                {item.caption}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
