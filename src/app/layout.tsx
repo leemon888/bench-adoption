@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
+import { RefreshOnBack } from "./RefreshOnBack";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -35,6 +36,7 @@ export default function RootLayout({
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-screen bg-[var(--cream)] text-[var(--ink)]">
+        <RefreshOnBack />
         <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--forest-900)] text-[var(--cream)]">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
             <Link href="/" className="flex items-center gap-2.5">

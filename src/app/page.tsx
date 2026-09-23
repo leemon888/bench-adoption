@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSections, getSummary, listBenches, type BenchFilter } from "@/lib/benches";
 
 export const metadata = { title: "Adopt a bench" };
+export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 40;
 

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getBench } from "@/lib/benches";
 import { AdoptForm } from "./AdoptForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function BenchDetailPage({
   params,
 }: {
