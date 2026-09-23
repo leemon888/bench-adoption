@@ -21,10 +21,18 @@ function StatTile({ label, value }: { label: string; value: number }) {
       <p className="font-display text-3xl font-semibold text-[var(--forest-700)]">
         {value.toLocaleString()}
       </p>
-      <p className="mt-0.5 text-sm text-[var(--ink-faint)]">{label}</p>
+      <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[var(--ink-faint)]">
+        {label}
+      </p>
     </div>
   );
 }
+
+const FILTER_TABS: { value: BenchFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "available", label: "Available" },
+  { value: "adopted", label: "Adopted" },
+];
 
 function StatusPill({ status }: { status: "available" | "adopted" }) {
   const adopted = status === "adopted";
@@ -83,26 +91,45 @@ export default async function BenchesPage({
       </section>
 
       <div className="mb-8 grid grid-cols-3 gap-3 sm:gap-4">
-        <StatTile label="Total benches" value={summary.total} />
+        <StatTile label="Benches" value={summary.total} />
         <StatTile label="Available" value={summary.available} />
         <StatTile label="Adopted" value={summary.adopted} />
       </div>
 
       <form
-        className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-[var(--border)] bg-[var(--paper)] p-4"
+        className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-[var(--border)] bg-[var(--paper)] p-4"
         action="/"
       >
+        <input type="hidden" name="filter" value={filter} />
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium uppercase tracking-wide text-[var(--ink-faint)]">
             Search
           </label>
-          <input
-            type="text"
-            name="q"
-            defaultValue={query}
-            placeholder="Bench code or donor name"
-            className="w-56 rounded-md border border-[var(--border)] bg-white px-3 py-2 text-sm"
-          />
+          <div className="relative">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--ink-faint)]"
+            >
+              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
+              <path
+                d="M20 20l-3.2-3.2"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+            <input
+              type="text"
+              name="q"
+              defaultValue={query}
+              placeholder="Bench code, area, or donor name"
+              className="w-64 rounded-md border border-[var(--border)] bg-white py-2 pl-8 pr-3 text-sm"
+            />
+          </div>
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium uppercase tracking-wide text-[var(--ink-faint)]">
@@ -121,25 +148,11 @@ export default async function BenchesPage({
             ))}
           </select>
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-[var(--ink-faint)]">
-            Status
-          </label>
-          <select
-            name="filter"
-            defaultValue={filter}
-            className="rounded-md border border-[var(--border)] bg-white px-3 py-2 text-sm"
-          >
-            <option value="all">All</option>
-            <option value="available">Available</option>
-            <option value="adopted">Adopted</option>
-          </select>
-        </div>
         <button
           type="submit"
           className="rounded-md bg-[var(--forest-700)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--forest-600)]"
         >
-          Filter
+          Search
         </button>
         {(query || section || filter !== "all") && (
           <Link
@@ -150,6 +163,26 @@ export default async function BenchesPage({
           </Link>
         )}
       </form>
+
+      <div className="mb-6 inline-flex rounded-lg border border-[var(--border)] bg-[var(--paper)] p-1">
+        {FILTER_TABS.map((tab) => (
+          <Link
+            key={tab.value}
+            href={buildHref({
+              filter: tab.value === "all" ? undefined : tab.value,
+              section,
+              q: query,
+            })}
+            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+              filter === tab.value
+                ? "bg-[var(--forest-700)] text-white"
+                : "text-[var(--ink-soft)] hover:bg-[var(--leaf-100)]"
+            }`}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
 
       <p className="mb-3 text-sm text-[var(--ink-faint)]">
         {results.length} bench{results.length === 1 ? "" : "es"} match
@@ -170,11 +203,26 @@ export default async function BenchesPage({
               <StatusPill status={bench.status} />
             </div>
             <p className="mt-1.5 text-sm text-[var(--ink-soft)]">{bench.section}</p>
-            {bench.adoption && (
-              <p className="mt-2 border-t border-[var(--border)] pt-2 text-sm text-[var(--ink-faint)]">
-                Dedicated by {bench.adoption.donorName} &middot; through{" "}
-                {bench.expiresOn}
-              </p>
+            {bench.adoption ? (
+              <div className="mt-2 border-t border-[var(--border)] pt-2">
+                <p className="text-sm text-[var(--ink-faint)]">
+                  Dedicated by {bench.adoption.donorName} &middot; through{" "}
+                  {bench.expiresOn}
+                </p>
+                <span className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-[var(--forest-700)]">
+                  View dedication
+                  <span className="transition-transform group-hover:translate-x-0.5">
+                    &rarr;
+                  </span>
+                </span>
+              </div>
+            ) : (
+              <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-[var(--forest-700)]">
+                Adopt this bench
+                <span className="transition-transform group-hover:translate-x-0.5">
+                  &rarr;
+                </span>
+              </span>
             )}
           </Link>
         ))}

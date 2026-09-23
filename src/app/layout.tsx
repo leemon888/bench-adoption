@@ -75,9 +75,6 @@ export default function RootLayout({
                 </span>
               </span>
             </Link>
-            <span className="hidden font-display text-sm italic text-[var(--gold-100)] sm:block">
-              A gift that lasts, a seat with a story
-            </span>
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">{children}</main>
